@@ -76,14 +76,49 @@
   pip install -r requirements.txt
   ```
 
-### 7. Deploying the CDK Stack
+### 7. Modify the Stack File
+- In Python, your stack file will be inside the `cdk_web_app` directory (or whatever name you chose for the project). 
+- Open `cdk_web_app/cdk_web_app_stack.py` and define your infrastructure.
+
+The below code sets up a simple web application using ECS and Fargate in Python:
+
+```python
+from aws_cdk import (
+    Stack,
+    aws_ec2 as ec2,
+    aws_ecs as ecs,
+    aws_ecs_patterns as ecs_patterns
+)
+from constructs import Construct
+
+class MyWebAppStack(Stack):
+    def __init__(self, scope: Construct, id: str, **kwargs) -> None:
+        super().__init__(scope, id, **kwargs)
+
+        # Create a VPC
+        vpc = ec2.Vpc(self, "MyVpc", max_azs=3)
+
+        # Create an ECS Cluster
+        cluster = ecs.Cluster(self, "MyCluster", vpc=vpc)
+
+        # Create a Fargate service and Application Load Balancer
+        ecs_patterns.ApplicationLoadBalancedFargateService(self, "MyFargateService",
+            cluster=cluster,
+            task_image_options={
+                "image": ecs.ContainerImage.from_registry("amazon/amazon-ecs-sample")
+            },
+            public_load_balancer=True
+        )
+```
+
+### 8. Deploying the CDK Stack
 - Inside the virtual environment, run:
   ```bash
   cdk deploy
   ```
   This will deploy your infrastructure.
 
-### 8. Verify Your Deployment
+### 9. Verify Your Deployment
 - Check your AWS account to verify the deployment.
 
 ---
